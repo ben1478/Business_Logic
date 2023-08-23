@@ -325,7 +325,7 @@ namespace Business_Logic.Model
             {
                 if (p_Entity["APP_STATUS"].ToString() == "ADD")
                 {
-                    m_TransResult = g_DC.InsertIntoByEntity<SysEntity.tbAppropriation>(p_EmployeeEntity, "tbAppropriation", p_Entity,true, "AE_DB");
+                    m_TransResult = g_DC.InsertIntoByEntity<SysEntity.tbAppropriation>(p_EmployeeEntity, "tbAppropriation", p_Entity, true, "AE_DB");
                     if (m_TransResult.isSuccess)
                     {
                         m_TransResult.LogMessage = "存檔成功";
@@ -336,38 +336,25 @@ namespace Business_Logic.Model
                     string m_SQL = "";
                     using (SqlCommand m_cmd = new SqlCommand())
                     {
-                        if (p_Entity["APP_STATUS"].ToString() == "UPD_Transfer")
-                        {
-                            m_SQL = "Update tbAppropriation  set Transfer_date =@Transfer_date  ,Upd_User=@Upd_User, Upd_date=Getdate() WHERE Form_no=@Form_no and ExamineNo=@ExamineNo ";
-                            m_cmd.Parameters.Add(new SqlParameter("Transfer_date", p_Entity["Transfer_date"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("Upd_User", p_EmployeeEntity.WorkID));
 
-                            m_cmd.Parameters.Add(new SqlParameter("Form_no", p_Entity["Form_no"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("ExamineNo", p_Entity["ExamineNo"].ToString()));
-                        }
-                        else
-                        {
-                            m_SQL = "Update tbAppropriation  set Appr_Type =@Appr_Type, HandlingFee =@HandlingFee, PathFee =@PathFee,CustTotAmt=@CustTotAmt , RemitFee =@RemitFee" +
-                              " , ActualAmt =@ActualAmt  , PathAmt = @PathAmt , Upd_User=@Upd_User, Upd_date=Getdate() WHERE Form_no=@Form_no and ExamineNo=@ExamineNo " +
-                              "  ";
-                            m_cmd.Parameters.Add(new SqlParameter("Appr_Type", p_Entity["Appr_Type"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("HandlingFee", p_Entity["HandlingFee"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("PathFee", p_Entity["PathFee"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("CustTotAmt", p_Entity["CustTotAmt"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("RemitFee", p_Entity["RemitFee"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("ActualAmt", p_Entity["ActualAmt"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("PathAmt", p_Entity["PathAmt"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("Upd_User", p_EmployeeEntity.WorkID));
+                        m_SQL = "Update tbAppropriation  set Appr_Type =@Appr_Type, HandlingFee =@HandlingFee, PathFee =@PathFee,CustTotAmt=@CustTotAmt , RemitFee =@RemitFee" +
+                          " , ActualAmt =@ActualAmt  , PathAmt = @PathAmt , Transfer_date =@Transfer_date, Upd_User=@Upd_User, Upd_date=Getdate() WHERE Form_no=@Form_no and ExamineNo=@ExamineNo " +
+                          "  ";
+                        m_cmd.Parameters.Add(new SqlParameter("Appr_Type", p_Entity["Appr_Type"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("HandlingFee", p_Entity["HandlingFee"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("PathFee", p_Entity["PathFee"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("CustTotAmt", p_Entity["CustTotAmt"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("RemitFee", p_Entity["RemitFee"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("ActualAmt", p_Entity["ActualAmt"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("PathAmt", p_Entity["PathAmt"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("Upd_User", p_EmployeeEntity.WorkID));
+                        m_cmd.Parameters.Add(new SqlParameter("Transfer_date", p_Entity["Transfer_date"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("Form_no", p_Entity["Form_no"].ToString()));
+                        m_cmd.Parameters.Add(new SqlParameter("ExamineNo", p_Entity["ExamineNo"].ToString()));
 
-                            m_cmd.Parameters.Add(new SqlParameter("Form_no", p_Entity["Form_no"].ToString()));
-                            m_cmd.Parameters.Add(new SqlParameter("ExamineNo", p_Entity["ExamineNo"].ToString()));
-                        }
-
-
-                      
 
                         m_cmd.CommandText = m_SQL;
-                        m_TransResult = g_DC.ExecuteNonQuery(p_EmployeeEntity, m_cmd,"AE_DB");
+                        m_TransResult = g_DC.ExecuteNonQuery(p_EmployeeEntity, m_cmd, "AE_DB");
                         if (m_TransResult.isSuccess)
                         {
                             m_TransResult.LogMessage = "存檔成功";
