@@ -151,7 +151,7 @@ namespace Business_Logic.Model
                                "  Left Join (select * from tbQCS_capitalApply where [payeeTypeName]='裕富') QC on Q.form_no=QC.form_no and Q.qcs_idx=QC.qcs_idx  " +
                                "  Left Join (select form_no,qcs_idx, CONVERT(VARCHAR(10), CAST(appropriateDate AS DATE), 111) PayDate from tbQCS_capitalApply where [payeeTypeName]<>'裕富') KF on Q.form_no=KF.form_no and Q.qcs_idx=KF.qcs_idx  " +
                                "  Left Join ( select form_no,Status, car_no,ExamineNo,customer_name,customer_idcard_no,transactionId_qcs,transactionId   " +
-                               "              from tbReceive where Status='1' and CaseStatus='AP'   " +
+                               "              from tbReceive where Status='1' and CaseStatus in('AP','RP')  " +
                                "             ) R on RP.form_no=R.form_no " +
                                "   Left Join tbAppropriation APP on R.form_no=APP.form_no and R.ExamineNo=APP.ExamineNo  " +
                                "  where PayDate<>''  and R.Status is not null ";
@@ -171,6 +171,47 @@ namespace Business_Logic.Model
             }
             return m_TransResult;
         }
+
+
+        public SysEntity.TransResult GetPrePaymentGrid(SysEntity.Employee p_EmployeeEntity, Dictionary<string, Object> p_dicRec, string p_PageIndex, string p_PageSize, Dictionary<string, Object> p_Param)
+        {
+            SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
+            Dictionary<string, Object> m_objBetween = new Dictionary<string, Object>();
+
+          
+
+            string[] m_LikeProp = { };
+
+            try
+            {
+                string m_SQL = " select " +
+                      " case when R.promotion_no in ('DQ01', 'DQ02', 'DQ04', 'DQ05', 'DQ06', 'DQ07') then '新_OA機車原融'" +
+                               "     when R.promotion_no in ('DQ74','DQ03') then 'OA機車原融' " +
+                               " end promoName,R.ExamineNo ExamineNo_Pay, R.customer_name,R.customer_idcard_no,  " +
+                               " R.car_no,R.instNo, " +
+                               "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, R.[instAmt]), 1), '.00', '')instAmt,  " +
+                               "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, R.instCap), 1), '.00', '') instCap, " +
+                               "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, isnull(R.remitAmount,0)), 1), '.00', '') remitAmount, R.form_no     " +
+                               "  from tbReceive R   " +
+                               "  where  R.Status is not null and R.CaseStatus in ('AP','RP') ";
+                using (SqlCommand m_cmd = g_DC.GetQueryCommand(p_EmployeeEntity, m_SQL, p_dicRec, m_objBetween, m_LikeProp))
+                {
+                    m_TransResult = g_DC.GetDataTableByGrid(p_EmployeeEntity, m_cmd, p_Param, p_PageSize, p_PageIndex, "AE_DB");
+                    if (m_TransResult.isSuccess)
+                    {
+                        m_TransResult = g_DC.GridDataCtrl(m_TransResult, p_PageSize, p_Param);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                m_TransResult.LogMessage = ex.Message;
+                m_TransResult.isSuccess = false;
+            }
+            return m_TransResult;
+        }
+
+
 
         public SysEntity.TransResult GetAppropriationInfos(SysEntity.Employee p_EmployeeEntity, Dictionary<string, Object> p_Params,bool isExcel=false )
         {
@@ -228,21 +269,32 @@ namespace Business_Logic.Model
             SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
             try
             {
-                string m_SQL = " select case when APP.form_no is null then 'N' else 'Y' end IsAppr, PayDate,  SUBSTRING(Q.promoName, 1, CHARINDEX('(', Q.promoName) - 1) promoName,R.ExamineNo ExamineNo_Pay, R.customer_name,R.customer_idcard_no, " +
-                              " R.car_no,QP.[instNo] ,REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, QP.[instAmt]), 1), '.00', '')instAmt ," +
-                              " REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, Q.instCap), 1), '.00', '') instCap, R.form_no," +
-                              " REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, isnull(QC.remitAmount,0)), 1), '.00', '') remitAmount            " +
-                              "  from [tbRequestPayment] RP   " +
-                              "  Left Join [tbQCS] Q on RP.transactionId_qcs= Q.transactionId  " +
-                              "  Left Join [tbQCS_payment] QP on Q.form_no=QP.form_no and Q.qcs_idx=QP.qcs_idx  " +
-                              "  Left Join (select * from tbQCS_capitalApply where [payeeTypeName]='裕富') QC on Q.form_no=QC.form_no and Q.qcs_idx=QC.qcs_idx  " +
-                              "  Left Join (select form_no,qcs_idx, CONVERT(VARCHAR(10), CAST(appropriateDate AS DATE), 111) PayDate from tbQCS_capitalApply where [payeeTypeName]<>'裕富') KF on Q.form_no=KF.form_no and Q.qcs_idx=KF.qcs_idx  " +
-                              "  Left Join ( select form_no,Status, car_no,ExamineNo,customer_name,customer_idcard_no,transactionId_qcs,transactionId   " +
-                              "              from tbReceive where Status='1' and CaseStatus='AP'   " +
-                              "             ) R on RP.form_no=R.form_no " +
-                              "   Left Join tbAppropriation APP on R.form_no=APP.form_no and R.ExamineNo=APP.ExamineNo  " +
-                              "  where PayDate<>''  and R.Status is not null  and PayDate=@PayDate ";
-               
+                string m_SQL = " select " +
+                    " case when R.promotion_no in ('DQ01', 'DQ02', 'DQ04', 'DQ05', 'DQ06', 'DQ07') then '新_OA機車原融'" +
+                             "     when R.promotion_no in ('DQ74','DQ03') then 'OA機車原融' " +
+                             " end promoName,R.ExamineNo ExamineNo_Pay, R.customer_name,R.customer_idcard_no,  " +
+                             " R.car_no,R.instNo, " +
+                             "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, R.[instAmt]), 1), '.00', '')instAmt,  " +
+                             "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, R.instCap), 1), '.00', '') instCap, " +
+                             "  REPLACE(CONVERT(VARCHAR(12), CONVERT(MONEY, isnull(R.remitAmount,0)), 1), '.00', '') remitAmount, R.form_no     " +
+                             "  from tbReceive R   " +
+                             "  where  R.Status is not null and R.CaseStatus in ('AP','RP') and R.form_no in (  ";
+
+                Int32 ParamIdx = 0;
+                foreach (KeyValuePair<string, Object> item in p_Params)
+                {
+                    if (ParamIdx == 0)
+                    {
+                        m_SQL += " @" + item.Key;
+                    }
+                    else
+                    {
+                        m_SQL += " ,@" + item.Key;
+                    }
+                   
+                    ParamIdx++;
+                }
+                m_SQL += " )" ;
 
                 using (SqlCommand m_cmd = new SqlCommand(m_SQL))
                 {
