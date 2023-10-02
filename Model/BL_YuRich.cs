@@ -49,9 +49,9 @@ namespace Business_Logic.Model
             string[] m_LikeProp = { "WorkID", "DisplayName" };
             try
             {
-                string m_SQL = " SELECT Case_Company, form_no, FORMAT( YR.add_date, 'yyyy/MM/dd')add_date,DisplayName add_name" +
+                string m_SQL = " SELECT Case_Company, YR.form_no, FORMAT( YR.add_date, 'yyyy/MM/dd')add_date,DisplayName add_name" +
                                " ,isnull(ExamineNo,'')ExamineNo,  customer_name,          " +
-                               "  case when CaseStatus ='0' then '未轉裕富'  " +
+                               "  case when CaseStatus ='0' then '未轉裕富-'  +( dbo.GetJsonValue(ResultJSON,'msg'))  " +
                                "  when CaseStatus ='1' then '裕富收件' when CaseStatus ='2' then '核准' " +
                                "  when CaseStatus ='3' then '婉拒'     when CaseStatus ='4' then '附條件'  " +
                                "  when CaseStatus ='5' then '待補'     when CaseStatus ='6' then '補件'  " +
@@ -62,6 +62,9 @@ namespace Business_Logic.Model
                                "  case when CaseStatus in ('1','RE','RS','RP') then 'Y'else 'N' end IsAwait " +
                                "  from tbReceive YR " +
                                "  Left join [KF_DB].[dbo].[EmployeeInfo] E on  YR.Add_User=E.WorkID  " +
+                               "  Left join (select Form_No, ResultJSON from [tbAPILog] where TransactionId in (  " +
+                               "  select  MAX(TransactionId)TransactionId from [tbAPILog]  " +
+                               "  group by Form_No)) L on YR.form_no=L.Form_No " +
                                " where  YR.Status = '1' ";
                 using (SqlCommand m_cmd = g_DC.GetQueryCommand(p_EmployeeEntity, m_SQL, p_dicRec, m_objBetween, m_LikeProp))
                 {
