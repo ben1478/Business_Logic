@@ -25,7 +25,7 @@ namespace Business_Logic.Model
                 string m_SQL = "";
                 if (Type == "Year")
                 {
-                    m_SQL = "   select sum( CAST(House_sendcase.check_amount AS DECIMAL))amount, Year(get_amount_date) yyyy     " +
+                    m_SQL = "   select sum( CAST(House_sendcase.get_amount AS DECIMAL))amount, Year(get_amount_date) yyyy     " +
                        "  from House_sendcase    " +
                        "  LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'where House_sendcase.del_tag = '0' " +
                        "  AND isnull(House_sendcase.get_amount,'')<>''  " +
@@ -33,7 +33,7 @@ namespace Business_Logic.Model
                 }
                 else
                 {
-                    m_SQL = "   select sum( CAST(House_sendcase.check_amount AS DECIMAL))amount,  " +
+                    m_SQL = "   select sum( CAST(House_sendcase.get_amount AS DECIMAL))amount,  " +
                         "    month( get_amount_date)  mm, Year(get_amount_date) yyyy     " +
                         "  from House_sendcase    " +
                         "  LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'where House_sendcase.del_tag = '0' " +
@@ -94,7 +94,7 @@ namespace Business_Logic.Model
             SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
             try
             {
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(7), " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(7), " +
                     "get_amount_date, 126)  yyyymm , DisplayName from House_sendcase  LEFT JOIN House_apply on House_apply.HA_id " +
                     "= House_sendcase.HA_id AND House_apply.del_tag='0'  LEFT JOIN (select U_num ,U_BC,U_name  FROM User_M where" +
                     " del_tag='0' ) User_M ON User_M.U_num = House_apply.plan_num  where House_sendcase.del_tag = '0'" +
@@ -134,7 +134,7 @@ namespace Business_Logic.Model
                 string get_amount_date_s = Year+"-01-01";
                 string get_amount_date_e = Year + "-12-31";
 
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm  " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm  " +
                     " ,convert(varchar(7), get_amount_date, 126)  DisplayName  from House_sendcase " +
                     "   LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'  " +
                     "  where House_sendcase.del_tag = '0' AND isnull(House_sendcase.get_amount,'')<>'' " +
@@ -173,7 +173,7 @@ namespace Business_Logic.Model
             {
               
 
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(7),  " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(7),  " +
                     "get_amount_date, 126)  yyyymm , U_name from House_sendcase  LEFT JOIN House_apply on House_apply.HA_id  " +
                     "= House_sendcase.HA_id AND House_apply.del_tag='0'  LEFT JOIN (select U_num ,U_BC,U_name  FROM User_M where " +
                     " del_tag='0' ) User_M ON User_M.U_num = House_apply.plan_num  where House_sendcase.del_tag = '0'  " +
@@ -211,7 +211,7 @@ namespace Business_Logic.Model
             {
 
 
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm   " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm   " +
                     "   ,B.item_D_name DisplayName,User_M.U_BC CheckVal  from House_sendcase   " +
                     "  LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'   " +
                     "   LEFT JOIN (select U_num ,U_BC,U_name  FROM User_M where del_tag='0' ) User_M ON User_M.U_num = House_apply.plan_num    " +
@@ -224,7 +224,7 @@ namespace Business_Logic.Model
                     Month
                 };
 
-                m_SQL += "  group by convert(varchar(7), get_amount_date, 126),B.item_D_name,User_M.U_BC order by check_amount desc   ";
+                m_SQL += "  group by convert(varchar(7), get_amount_date, 126),B.item_D_name,User_M.U_BC order by get_amount desc   ";
 
                 using (SqlCommand m_cmd = new SqlCommand(m_SQL))
                 {
@@ -252,7 +252,7 @@ namespace Business_Logic.Model
             {
 
 
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(4), get_amount_date, 126)  yyyy   " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(4), get_amount_date, 126)  yyyy   " +
                     "   ,B.item_D_name DisplayName,User_M.U_BC CheckVal  from House_sendcase   " +
                     "  LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'   " +
                     "   LEFT JOIN (select U_num ,U_BC,U_name  FROM User_M where del_tag='0' ) User_M ON User_M.U_num = House_apply.plan_num    " +
@@ -265,7 +265,7 @@ namespace Business_Logic.Model
                     Year
                 };
 
-                m_SQL += "  group by convert(varchar(4), get_amount_date, 126),B.item_D_name,User_M.U_BC order by check_amount desc   ";
+                m_SQL += "  group by convert(varchar(4), get_amount_date, 126),B.item_D_name,User_M.U_BC order by get_amount desc   ";
 
                 using (SqlCommand m_cmd = new SqlCommand(m_SQL))
                 {
@@ -294,7 +294,7 @@ namespace Business_Logic.Model
             {
 
 
-                string m_SQL = " select sum( CAST(House_sendcase.check_amount AS DECIMAL))check_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm     " +
+                string m_SQL = " select sum( CAST(House_sendcase.get_amount AS DECIMAL))get_amount ,convert(varchar(7), get_amount_date, 126)  yyyymm     " +
                     "   ,U_name DisplayName,User_M.U_num CheckVal,U_BC  from House_sendcase     " +
                     "  LEFT JOIN House_apply on House_apply.HA_id = House_sendcase.HA_id AND House_apply.del_tag='0'   " +
                     "  LEFT JOIN (select U_num ,U_BC,U_name  FROM User_M where del_tag='0' ) User_M ON User_M.U_num = House_apply.plan_num      " +
@@ -306,7 +306,7 @@ namespace Business_Logic.Model
                     U_BC
                 };
 
-                m_SQL += "   group by convert(varchar(7), get_amount_date, 126),User_M.U_BC,U_name,U_num order by check_amount desc    ";
+                m_SQL += "   group by convert(varchar(7), get_amount_date, 126),User_M.U_BC,U_name,U_num order by get_amount desc    ";
 
                 using (SqlCommand m_cmd = new SqlCommand(m_SQL))
                 {

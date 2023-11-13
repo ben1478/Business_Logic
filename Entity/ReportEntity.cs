@@ -11,7 +11,7 @@ namespace Business_Logic.Entity
 
         public class Achievement
         {
-            public String check_amount { get; set; }
+            public String get_amount { get; set; }
             public String yyyymm { get; set; }
             public String DisplayName { get; set; }
             public String CheckVal { get; set; }
