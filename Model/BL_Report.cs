@@ -48,7 +48,7 @@ namespace Business_Logic.Model
                 };
                 if (Type == "Year")
                 {
-                    m_SQL += " group by Year(get_amount_date) " +
+                    m_SQL += " group by Year(get_amount_date)   " +
                              " order by Year(get_amount_date) asc   ";
                 }
                 else
