@@ -410,7 +410,7 @@ namespace Business_Logic.Entity
             public String CurrentLanguage { get; set; }
             public String Remark { get; set; }
             public String GroupID { get; set; }
-
+            public String UserIP { get; set; }
         }
 
 

@@ -132,6 +132,7 @@
     <Compile Include="Common\SysLog.cs" />
     <Compile Include="Entity\ReportEntity.cs" />
     <Compile Include="Entity\SysEntity.cs" />
+    <Compile Include="Model\BL_AE_Web.cs" />
     <Compile Include="Model\BL_Report.cs" />
     <Compile Include="Model\BL_System.cs" />
     <Compile Include="Model\BL_YuRich.cs" />

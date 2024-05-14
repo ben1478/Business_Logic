@@ -65,45 +65,81 @@ namespace Business_Logic.Model
         /// <param name="WorkID"></param>
         /// <param name="PW"></param>
         /// <returns></returns>
-        public SysEntity.TransResult ReLogin( string WorkID, string PW)
+        public SysEntity.TransResult ReLogin( string WorkID, string PW, string Company)
         {
             SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
             try
             {
                 SysEntity.Employee m_EmployeeEntity = new SysEntity.Employee();
                 m_EmployeeEntity.WorkID = "ReLogin";
-
-                string m_SQL = " select E.*,G.GroupID from EmployeeInfo E Left Join EmployeeGroup G on E.WorkID=G.WorkID where E.WorkID=@WorkID  and Password=@PW  ";
-                using (SqlCommand m_cmd = new SqlCommand(m_SQL))
+                if (Company != "AE")
                 {
-                    m_cmd.Parameters.Add(new SqlParameter("WorkID", WorkID));
-                    m_cmd.Parameters.Add(new SqlParameter("PW", PW));
-                    m_TransResult = g_DC.GetDataTable(m_EmployeeEntity, m_cmd);
-                    if (m_TransResult.isSuccess)
+                    string m_SQL = " select E.*,G.GroupID from EmployeeInfo E Left Join EmployeeGroup G on E.WorkID=G.WorkID where E.WorkID=@WorkID  and Password=@PW  ";
+                    using (SqlCommand m_cmd = new SqlCommand(m_SQL))
                     {
-                        DataTable dtEmployee = (DataTable)m_TransResult.ResultEntity;
-                        if (dtEmployee.Rows.Count > 0)
+                        m_cmd.Parameters.Add(new SqlParameter("WorkID", WorkID));
+                        m_cmd.Parameters.Add(new SqlParameter("PW", PW));
+                        m_TransResult = g_DC.GetDataTable(m_EmployeeEntity, m_cmd);
+                        if (m_TransResult.isSuccess)
                         {
-                            SysEntity.Employee m_ResultEmployee = new SysEntity.Employee();
-                            foreach (DataRow dr in dtEmployee.Rows)
+                            DataTable dtEmployee = (DataTable)m_TransResult.ResultEntity;
+                            if (dtEmployee.Rows.Count > 0)
                             {
-                                m_ResultEmployee.CurrentLanguage = "TW";
-                                m_ResultEmployee.WorkID = WorkID;
-                                m_ResultEmployee.DisplayName = dr["DisplayName"].ToString();
-                                m_ResultEmployee.CompanyCode = dr["CompanyCode"].ToString();
-                                m_ResultEmployee.Remark = dr["Remark"].ToString();
-                                m_ResultEmployee.GroupID = dr["GroupID"].ToString();
-                            }
-                            m_TransResult.ResultEntity = (SysEntity.Employee)m_ResultEmployee;
+                                SysEntity.Employee m_ResultEmployee = new SysEntity.Employee();
+                                foreach (DataRow dr in dtEmployee.Rows)
+                                {
+                                    m_ResultEmployee.CurrentLanguage = "TW";
+                                    m_ResultEmployee.WorkID = WorkID;
+                                    m_ResultEmployee.DisplayName = dr["DisplayName"].ToString();
+                                    m_ResultEmployee.CompanyCode = dr["CompanyCode"].ToString();
+                                    m_ResultEmployee.Remark = dr["Remark"].ToString();
+                                    m_ResultEmployee.GroupID = dr["GroupID"].ToString();
+                                }
+                                m_TransResult.ResultEntity = (SysEntity.Employee)m_ResultEmployee;
 
-                        }
-                        else
-                        {
-                            m_TransResult.isSuccess = false;
-                            m_TransResult.LogMessage = "輸入帳號密碼錯誤!!";
+                            }
+                            else
+                            {
+                                m_TransResult.isSuccess = false;
+                                m_TransResult.LogMessage = "輸入帳號密碼錯誤!!";
+                            }
                         }
                     }
                 }
+                else
+                {
+                    string m_SQL = " select * from User_M E  where E.U_num=@WorkID and U_psw=@PW  ";
+                    using (SqlCommand m_cmd = new SqlCommand(m_SQL))
+                    {
+                        m_cmd.Parameters.Add(new SqlParameter("WorkID", WorkID));
+                        m_cmd.Parameters.Add(new SqlParameter("PW", PW));
+                        m_TransResult = g_DC.GetDataTable(m_EmployeeEntity, m_cmd, "AE_DB");
+                        if (m_TransResult.isSuccess)
+                        {
+                            DataTable dtEmployee = (DataTable)m_TransResult.ResultEntity;
+                            if (dtEmployee.Rows.Count > 0)
+                            {
+                                SysEntity.Employee m_ResultEmployee = new SysEntity.Employee();
+                                foreach (DataRow dr in dtEmployee.Rows)
+                                {
+                                    m_ResultEmployee.CurrentLanguage = "TW";
+                                    m_ResultEmployee.WorkID = WorkID;
+                                    m_ResultEmployee.DisplayName = dr["U_name"].ToString();
+                                    m_ResultEmployee.CompanyCode = "AE";
+                                    m_ResultEmployee.GroupID = "AE_DB";
+                                    m_ResultEmployee.Remark = "AE";
+                                }
+                                m_TransResult.ResultEntity = (SysEntity.Employee)m_ResultEmployee;
+                            }
+                            else
+                            {
+                                m_TransResult.isSuccess = false;
+                                m_TransResult.LogMessage = "輸入帳號密碼錯誤!!";
+                            }
+                        }
+                    }
+                }
+                
 
             }
             catch (Exception ex)

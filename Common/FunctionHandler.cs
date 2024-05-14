@@ -93,9 +93,6 @@ namespace Business_Logic
             httpClient.PostAsync("https://notify-api.line.me/api/notify", new FormUrlEncodedContent(content));
         }
 
-      
-
-
         public Boolean isMobileServer()
         {
             Boolean m_isMobileServer = false;

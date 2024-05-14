@@ -860,6 +860,61 @@ namespace Business_Logic
             return m_TransResult;
         }
 
+
+        public SysEntity.TransResult InsertIntoCmdByEntity<T>(SysEntity.Employee p_EmployeeEntity, string p_TableName, Dictionary<string, Object> p_Entity) where T : new()
+        {
+            SysEntity.CommandEntity m_CommandEntity = new SysEntity.CommandEntity();
+
+            var m_STypet = new T();
+            SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
+            try
+            {
+                var props = m_STypet.GetType().GetProperties();
+                string m_SQL = "Insert into [dbo].[" + p_TableName + "]  ";
+
+                string m_Columns = "";
+                string m_Values = "";
+                object m_Obj = null;
+               
+                foreach (var prop in props)
+                {
+                    string m_propName = prop.Name;
+                    if (p_Entity.TryGetValue(m_propName, out m_Obj))
+                    {
+                        if (p_Entity[m_propName] != null)
+                        {
+                            string m_value = p_Entity[m_propName].ToString(); // against prop.Name
+                            if (m_value != "")
+                            {
+                                m_Columns += (m_Columns == "" ? "(" : ",") + m_propName;
+                                m_Values += (m_Values == "" ? "Values(" : ",") + "@" + m_propName;
+                            }
+                        }
+                    }
+                }
+               
+                    m_SQL += m_Columns + " )  " + m_Values + " ) ";
+
+
+                m_CommandEntity.SQLCommand = m_SQL;
+                object exProd = ConvertToDynamic(p_Entity);
+
+                m_CommandEntity.Parameters = exProd;
+
+                m_TransResult.isSuccess = true;
+                m_TransResult.ResultEntity = m_CommandEntity;
+
+            }
+            catch (Exception ex)
+            {
+                m_TransResult.LogMessage = ex.Message;
+                m_TransResult.isSuccess = false;
+            }
+
+            return m_TransResult;
+        }
+
+
         public dynamic ConvertToDynamic(Dictionary<string, Object> obj)
         {
             IDictionary<string, object> result = new ExpandoObject();
@@ -899,12 +954,25 @@ namespace Business_Logic
                     else
                     {
                         m_propName = ((KeyValuePair<string, Object>)prop).Key;
-                        value = ((KeyValuePair<string, Object>)prop).Value.ToString();
+                        if (((KeyValuePair<string, Object>)prop).Value is null)
+                        {
+                            value ="";
+                        }
+                        else
+                        {
+                            value = ((KeyValuePair<string, Object>)prop).Value.ToString();
+                        }
+                        
                     }
 
                     if (p_Entity.TryGetValue(m_propName, out m_Obj))
                     {
-                        string m_value = p_Entity[m_propName].ToString(); // against prop.Name
+                        string m_value = "";
+                        if (p_Entity[m_propName] !=null)
+                        {
+                            m_value = p_Entity[m_propName].ToString(); // against prop.Name
+                        }
+
                         if (m_value != "")
                         {
                             m_Columns += (m_Columns == "" ? "(" : ",") + m_propName;
@@ -926,13 +994,14 @@ namespace Business_Logic
             return m_CommandEntity;
         }
 
-        public SysEntity.TransResult ExecuteCommandEntitys(SysEntity.Employee p_Employee, List<SysEntity.CommandEntity> p_CommandEntitys)
+        public SysEntity.TransResult ExecuteCommandEntitys(SysEntity.Employee p_Employee, List<SysEntity.CommandEntity> p_CommandEntitys, string p_ConnStr = "KF_DB")
         {
             SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
             Int32 m_CommitCount = 0;
+            string m_strConnectionString = ConfigurationManager.AppSettings[p_ConnStr].ToString();
             using (var transactionScope = new TransactionScope())
             {
-                using (SqlConnection conn = new SqlConnection(strConnectionString))
+                using (SqlConnection conn = new SqlConnection(m_strConnectionString))
                 {
                     //Start Transaction
                     conn.Open();
