@@ -60,7 +60,7 @@ namespace Business_Logic.Model
             return m_TransResult;
         }
         /// <summary>
-        /// TimeOut重新登入
+        /// TimeOut 重新登入
         /// </summary>
         /// <param name="WorkID"></param>
         /// <param name="PW"></param>
@@ -70,6 +70,7 @@ namespace Business_Logic.Model
             SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
             try
             {
+                //fffff
                 SysEntity.Employee m_EmployeeEntity = new SysEntity.Employee();
                 m_EmployeeEntity.WorkID = "ReLogin";
                 if (Company != "AE")
