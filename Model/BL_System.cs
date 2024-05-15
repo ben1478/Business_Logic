@@ -60,7 +60,7 @@ namespace Business_Logic.Model
             return m_TransResult;
         }
         /// <summary>
-        /// TimeOut 重新登入
+        /// TimeOut重新登入
         /// </summary>
         /// <param name="WorkID"></param>
         /// <param name="PW"></param>
