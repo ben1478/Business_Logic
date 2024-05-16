@@ -62,7 +62,7 @@ namespace Business_Logic.Model
         /// <summary>
         /// TimeOut重新登入
         /// </summary>
-        /// <param name="WorkID"></param>
+        /// <param name="WorkID"></param>斯 
         /// <param name="PW"></param>
         /// <returns></returns>
         public SysEntity.TransResult ReLogin( string WorkID, string PW, string Company)
