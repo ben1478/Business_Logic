@@ -60,7 +60,7 @@ namespace Business_Logic.Model
             return m_TransResult;
         }
         /// <summary>
-        /// TimeOut重新登入
+        /// TimeOut重新登入 192.168.1.27
         /// </summary>
         /// <param name="WorkID"></param>斯 
         /// <param name="PW"></param>
