@@ -534,7 +534,10 @@ namespace Business_Logic.Model
                             {
                                 if (item.Key == "examStatusExplain")
                                 {
-                                    examStatus = item.Value.ToString();
+                                    if (item.Value != null)
+                                    {
+                                        examStatus = item.Value.ToString();
+                                    }
                                 }
                             }
                         }

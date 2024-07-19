@@ -135,6 +135,7 @@
     <Compile Include="Model\BL_AE_Web.cs" />
     <Compile Include="Model\BL_Report.cs" />
     <Compile Include="Model\BL_System.cs" />
+    <Compile Include="Model\BL_TEL.cs" />
     <Compile Include="Model\BL_YuRich.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

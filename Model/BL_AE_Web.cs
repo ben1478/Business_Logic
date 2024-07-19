@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using static Business_Logic.Entity.SysEntity;
 
 namespace Business_Logic.Model
@@ -622,6 +623,109 @@ namespace Business_Logic.Model
                             m_TransResult.isSuccess = false;
                             m_TransResult.LogMessage = "查無資料!!!";
                         }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                m_TransResult.LogMessage = ex.Message;
+                m_TransResult.isSuccess = false;
+            }
+            return m_TransResult;
+        }
+
+
+
+
+        public SysEntity.TransResult GeTestData(SysEntity.Employee p_EmployeeEntity, int pageNumber, int pageSize, string sortField, string sortOrder, string formID, string description)
+        {
+            SysEntity.TransResult m_TransResult = new SysEntity.TransResult();
+            int recordsTotal = 0;
+            int recordsFiltered = 0;
+            List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
+
+
+            try
+            {
+              
+
+                // Default order column and direction
+                string orderBy = "FormID";
+                string orderDirection = "ASC";
+
+                if (!string.IsNullOrEmpty(sortField) && sortField != "RowNum")
+                {
+                    orderBy = sortField;
+                }
+
+                if (!string.IsNullOrEmpty(sortOrder))
+                {
+                    orderDirection = sortOrder;
+                }
+
+                int startIndex = (pageNumber - 1) * pageSize + 1;
+                int endIndex = pageNumber * pageSize;
+
+                string m_SQL = $@"
+                        SELECT * FROM (
+                            SELECT ROW_NUMBER() OVER (ORDER BY {orderBy} {orderDirection}) AS RowNum, FormID, [Description]
+                            FROM FormInfo
+                            WHERE (@FormID IS NULL OR FormID LIKE @FormID)
+                              AND (@Description IS NULL OR [Description] LIKE @Description)
+                        ) AS RowConstrainedResult
+                        WHERE RowNum >= @StartRow AND RowNum < @EndRow
+                        ORDER BY RowNum";
+
+
+
+                using (SqlCommand m_cmd = new SqlCommand(m_SQL))
+                {
+                    m_cmd.Parameters.AddWithValue("@FormID", string.IsNullOrEmpty(formID) ? (object)DBNull.Value : "%" + formID + "%");
+                    m_cmd.Parameters.AddWithValue("@Description", string.IsNullOrEmpty(description) ? (object)DBNull.Value : "%" + description + "%");
+                    m_cmd.Parameters.AddWithValue("@StartRow", startIndex );
+                    m_cmd.Parameters.AddWithValue("@EndRow", endIndex);
+
+
+                    // Fetch total records
+                    string countSQL = "SELECT COUNT(*)COUN FROM FormInfo WHERE (@FormID IS NULL OR FormID LIKE @FormID) AND (@Description IS NULL OR [Description] LIKE @Description)";
+                    
+                    using (SqlCommand countCmd = new SqlCommand(countSQL))
+                    {
+                        countCmd.Parameters.AddWithValue("@FormID", string.IsNullOrEmpty(formID) ? (object)DBNull.Value : "%" + formID + "%");
+                        countCmd.Parameters.AddWithValue("@Description", string.IsNullOrEmpty(description) ? (object)DBNull.Value : "%" + description + "%");
+
+                        SysEntity.TransResult m_TransResultCou = g_DC.GetDataTable(p_EmployeeEntity,countCmd);
+                        if (m_TransResultCou.isSuccess)
+                        {
+                            recordsTotal = (int)((DataTable)m_TransResultCou.ResultEntity).Rows[0]["COUN"];
+                        }
+                    }
+
+                    m_TransResult = g_DC.GetDataTable(p_EmployeeEntity, m_cmd);
+                    if (m_TransResult.isSuccess)
+                    {
+                        DataTable dtEmployee = (DataTable)m_TransResult.ResultEntity;
+                        recordsFiltered = recordsTotal; // Assume no additional filters
+
+                        foreach (DataRow row in dtEmployee.Rows)
+                        {
+                            Dictionary<string, object> rowData = new Dictionary<string, object>();
+                            foreach (DataColumn column in dtEmployee.Columns)
+                            {
+                                rowData[column.ColumnName] = row[column];
+                            }
+                            data.Add(rowData);
+                        }
+
+                       var result = new
+                        {
+
+                           total = recordsFiltered,
+                           rows = data
+                        };
+
+                        m_TransResult.ResultEntity = result;
+                        m_TransResult.isSuccess = true;
                     }
                 }
             }
